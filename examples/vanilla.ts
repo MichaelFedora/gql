@@ -21,12 +21,25 @@ const s = new Server({
   handler: async (req) => {
     const { pathname } = new URL(req.url)
 
-    return pathname === '/graphql'
-      ? await GraphQLHTTP<Request>({
-          schema,
-          graphiql: true
-        })(req)
-      : new Response('Not Found', { status: 404 })
+    let res: Response
+
+    if(pathname === '/graphql') {
+      res = req.method === 'OPTIONS'
+        ? new Response(undefined, { status: 204, headers: { Allow: 'OPTIONS, GET, POST' }})
+        : await GraphQLHTTP<Request>({
+            schema,
+            graphiql: true
+          })(req)
+    } else {
+      res = req.method === 'OPTIONS'
+        ? new Response(undefined, { status: 204, headers: { Allow: '*' }})
+        : new Response('Not Found', { status: 404 })
+    }
+
+    res.headers.append('access-control-allow-origin', '*')
+    res.headers.append('access-control-allow-headers', 'Origin, Host, Content-Type, Accept')
+
+    return res
   },
   port: 3000
 })
