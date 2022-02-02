@@ -36,8 +36,10 @@ const s = new Server({
         : new Response('Not Found', { status: 404 })
     }
 
-    res.headers.append('access-control-allow-origin', '*')
-    res.headers.append('access-control-allow-headers', 'Origin, Host, Content-Type, Accept')
+    if(Deno.args.includes('--cors')) {
+      res.headers.append('access-control-allow-origin', '*')
+      res.headers.append('access-control-allow-headers', 'Origin, Host, Content-Type, Accept')
+    }
 
     return res
   },
